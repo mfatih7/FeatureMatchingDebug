@@ -10,7 +10,7 @@ import tpu_related.set_env_variables_for_TPU as set_env_variables_for_TPU
 # (most likely generating error) when each worker process is launched. You can place your dataset and DataLoader
 # instance creation logic here, as it doesn’t need to be re-executed in workers.
 
-if __name__ == '__main__':    
+if __name__ == '__main__':
 
     set_env_variables_for_TPU.set_env_variables_for_TPU_PJRT( )
 

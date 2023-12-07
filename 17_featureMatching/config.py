@@ -7,13 +7,13 @@ class Config:
         
         self.device = 'cpu'
         self.device = 'cuda'
-        # self.device = 'tpu'
+        self.device = 'tpu'
         
         if(self.device=='tpu'):
             self.storage_local_or_bucket = 'bucket'    
             
             self.bucket_name = 'bucket-us-central1-relativeposeestimation'
-            self.bucket_name = 'bucket-europe-west4-relativeposeestimation'
+            # self.bucket_name = 'bucket-europe-west4-relativeposeestimation'
             
             self.TPU_DEBUG = 0
             # self.TPU_DEBUG = 1
@@ -24,10 +24,10 @@ class Config:
         if( self.device == 'tpu' ):
             os.chdir( os.path.join('/', 'home', 'mfatih', '17_featureMatching') )
         
-        self.first_experiment = 706
+        self.first_experiment = 700
         
         self.use_hdf5_or_picle = 'hdf5'
-        # self.use_hdf5_or_picle = 'pickle'
+        self.use_hdf5_or_picle = 'pickle'
         
         self.file_name_train = 'yfcc-sift-2000-train.hdf5'
         self.file_name_val = 'yfcc-sift-2000-val.hdf5'
@@ -119,7 +119,7 @@ class Config:
         self.optimizer_types = ['SGD']
         
         self.validation_chunk_or_all = 'chunk'
-        # self.validation_chunk_or_all = 'all'
+        self.validation_chunk_or_all = 'all'
         
         self.save_checkpoint_last_or_all = 'last'
         self.save_checkpoint_last_or_all = 'all'

@@ -3,13 +3,29 @@ import shutil
 import numpy as np
 import torch
 
-# Checkpoint Functions For Train-Val
+import torch_xla.core.xla_model as xm
+import torch_xla.utils.serialization as xser
+
+def save_checkpoints_cpu_gpu_tpu( config, checkpoint, path_checkpoints_file ):
+    
+    if(config.device != 'tpu' ):
+        torch.save(checkpoint, path_checkpoints_file )
+    else:
+        # import torch_xla.core.xla_model as xm
+        xm.save(checkpoint, path_checkpoints_file, master_only=True ) # Default master_only True
+        # xser.save(checkpoint, path_checkpoints_file, master_only=True ) # Default master_only True
 
 def save_initial_checkpoint( config, model, optimizer ):
 
     checkpoint_path = os.path.join( config.output_path_local, 'checkpoints' )
     if(os.path.exists(checkpoint_path)==0):
-        os.makedirs(checkpoint_path)
+
+        if(config.device != 'tpu' ):
+            os.makedirs(checkpoint_path)
+        else:
+            # import torch_xla.core.xla_model as xm
+            if(xm.is_master_ordinal()):
+                os.makedirs(checkpoint_path)
         
         success_checkpoint = np.zeros( (2, config.n_epochs[0], config.n_chunks, 4) )
         loss_checkpoint = np.zeros( (2, config.n_epochs[0], config.n_chunks, 3) )
@@ -28,26 +44,55 @@ def save_initial_checkpoint( config, model, optimizer ):
                       'proc_time_checkpoint': proc_time_checkpoint,
                      }
         checkpoint_file_with_path = os.path.join(checkpoint_path, 'model.pth.tar')
-        torch.save(checkpoint, checkpoint_file_with_path )
+        
+        # torch.save(checkpoint, checkpoint_file_with_path )
+        save_checkpoints_cpu_gpu_tpu( config, checkpoint, checkpoint_file_with_path )
 
 def load_checkpoint( config, device, model, optimizer ):
     
     checkpoint_path = os.path.join( config.output_path_local, 'checkpoints' )
     checkpoint_file_with_path = os.path.join(checkpoint_path, 'model.pth.tar')
+
+    # if(config.device == 'tpu' ):
+    #     import torch_xla.core.xla_model as xm
+
+    print( f"{xm.xla_real_devices([str(device)])[0]} DEB PNT 4A" )
     
-    checkpoint = torch.load(checkpoint_file_with_path)
+    # checkpoint = torch.load(checkpoint_file_with_path)
+    if(config.device != 'tpu' ):
+        checkpoint = torch.load( checkpoint_file_with_path )
+    else:        
+        # import torch_xla.utils.serialization as xser
+        print( f"{xm.xla_real_devices([str(device)])[0]} DEB PNT 4AA {checkpoint_file_with_path}" )
+        print( f"{xm.xla_real_devices([str(device)])[0]} DEB PNT 4AAA {os.getcwd()}" )
+        while True:
+            if( os.path.exists(checkpoint_file_with_path) ):
+                print( f"{xm.xla_real_devices([str(device)])[0]} DEB PNT 4AAAA {checkpoint_file_with_path}" )
+                checkpoint = xser.load( checkpoint_file_with_path )
+                break
+    
+    print( f"{xm.xla_real_devices([str(device)])[0]} DEB PNT 4B" )
     
     epoch = checkpoint['epoch']
     chunk = checkpoint['chunk']
+
+    print( f"{xm.xla_real_devices([str(device)])[0]} DEB PNT 4C" )
     
-    model.load_state_dict(checkpoint['model_state_dict'])    
+    model.load_state_dict(checkpoint['model_state_dict'])
+
+    print( f"{xm.xla_real_devices([str(device)])[0]} DEB PNT 4D" )
+
     model.to(device)
+
+    print( f"{xm.xla_real_devices([str(device)])[0]} DEB PNT 4E" )
     
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     
     success_checkpoint = checkpoint['success_checkpoint']
     loss_checkpoint = checkpoint['loss_checkpoint']
     proc_time_checkpoint = checkpoint['proc_time_checkpoint']
+
+    print( f"{xm.xla_real_devices([str(device)])[0]} DEB PNT 4F" )
     
     return epoch, chunk, model, optimizer, success_checkpoint, loss_checkpoint, proc_time_checkpoint
 
@@ -79,7 +124,8 @@ def save_checkpoint( config, epoch, chunk, model, optimizer, success_checkpoint,
                   'loss_checkpoint': loss_checkpoint,
                   'proc_time_checkpoint': proc_time_checkpoint,
                  }       
-    torch.save(checkpoint, checkpoint_file_with_path )
+    # torch.save(checkpoint, checkpoint_file_with_path )
+    save_checkpoints_cpu_gpu_tpu( config, checkpoint, checkpoint_file_with_path )
 
 # Checkpoint Functions For Test
 
