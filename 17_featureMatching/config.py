@@ -10,21 +10,17 @@ class Config:
         self.device = 'tpu'
         
         if(self.device=='tpu'):
-            self.storage_local_or_bucket = 'bucket'    
-            
-            self.bucket_name = 'bucket-us-central1-relativeposeestimation'
-            # self.bucket_name = 'bucket-europe-west4-relativeposeestimation'
+            self.storage_local_or_bucket = 'local'
             
             self.TPU_DEBUG = 0
-            # self.TPU_DEBUG = 1
-            self.tpu_debug_path = os.path.join('/', 'home', 'mfatih', 'tpu_debug')                
+            # self.TPU_DEBUG = 1          
         else:
-            self.storage_local_or_bucket = 'local'        
+            self.storage_local_or_bucket = 'local'     
         
         if( self.device == 'tpu' ):
-            os.chdir( os.path.join('/', 'home', 'mfatih', '17_featureMatching') )
+            os.chdir( os.path.join('/', 'home', 'mfatih', 'FeatureMatchingDebug', '17_featureMatching') )
         
-        self.first_experiment = 700
+        self.first_experiment = 100
         
         self.use_hdf5_or_picle = 'hdf5'
         self.use_hdf5_or_picle = 'pickle'
